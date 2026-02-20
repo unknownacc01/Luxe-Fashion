@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FashionStoreGA4 — Premium Fashion</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BGG9XX4S3P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BGG9XX4S3P', {
+    send_page_view: true,
+    cookie_flags: 'SameSite=None;Secure',
+    allow_google_signals: true,
+    allow_ad_personalization_signals: true,
+    page_title: 'FashionStoreGA4 — Premium Fashion',
+    page_location: window.location.href,
+    content_group: 'homepage'
+  });
+
+  // ── GA4 TRACKING LAYER ─────────────────────────────────────────
+  // Central tracking manager for consistent params across all events
+  const GA4 = {
+    MEASUREMENT_ID: 'G-BGG9XX4S3P',
+    CURRENCY: 'USD',
+    AFFILIATION: 'FashionStoreGA4 Online Store',
+    sessionStart: Date.now(),
+    scrollMilestones: new Set(),
+    timeMilestones: new Set(),
+    viewedPromotions: new Set(),
+    viewedProducts: new Set(),
+
+    // Build a standard GA4 item object with ALL recommended params
+    buildItem(product, extras = {}) {
+      const disc = product.oldPrice ? +(product.oldPrice - product.price).toFixed(2) : 0;
+      return {
+        item_id: product.id,
+        item_name: product.name,
+        affiliation: this.AFFILIATION,
+        item_brand: product.brand || 'FashionStoreGA4',
+        item_category: product.category,
+        item_category2: product.gender,
+        item_category3: product.badge || 'regular',
+        item_variant: product.gender,
+        price: product.price,
+        discount: disc,
+        currency: this.CURRENCY,
+        quantity: extras.quantity || 1,
+        item_list_id: extras.item_list_id || undefined,
+        item_list_name: extras.item_list_name || undefined,
+        index: extras.index || undefined,
+        coupon: extras.coupon || undefined
+      };
+    },
+
+    // Build items array from product list with list context
+    buildItemList(products, listName, listId) {
+      return products.map((p, i) => this.buildItem(p, {
+        item_list_id: listId,
+        item_list_name: listName,
+        index: i + 1
+      }));
+    },
+
+    // Send event with automatic timestamp & session context
+    track(eventName, params = {}) {
+      const enriched = {
+        ...params,
+        engagement_time_msec: Date.now() - this.sessionStart,
+        page_title: document.title,
+        page_location: window.location.href
+      };
+      gtag('event', eventName, enriched);
+      console.log(`[GA4] ${eventName}`, enriched);
+    }
+  };
+</script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0c0c0c;
+  --white:#ffffff;
+  --cream:#faf7f2;
+  --sand:#e8ddd0;
+  --taupe:#c4b5a0;
+  --accent:#9b6b47;
+  --accent2:#c8956a;
+  --gray:#6b6b6b;
+  --light:#f2ede6;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--black);overflow-x:hidden}
+
+/* ── ANNOUNCEMENT BAR ── */
+.announcement{background:var(--black);color:var(--sand);text-align:center;padding:.6rem 1rem;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase}
+.announcement a{color:var(--accent2);text-decoration:none}
+
+/* ── NAV ── */
+nav{background:var(--white);border-bottom:1px solid var(--sand);position:sticky;top:0;z-index:100;padding:0 3rem}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;letter-spacing:.3em;color:var(--black);text-decoration:none}
+.nav-menu{display:flex;gap:0;list-style:none}
+.nav-menu li{position:relative}
+.nav-menu>li>a{display:block;padding:.5rem 1.2rem;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;color:var(--black);text-decoration:none;transition:color .2s}
+.nav-menu>li>a:hover{color:var(--accent)}
+.dropdown{display:none;position:absolute;top:100%;left:0;background:var(--white);border:1px solid var(--sand);min-width:180px;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.nav-menu li:hover .dropdown{display:block}
+.dropdown a{display:block;padding:.7rem 1.2rem;font-size:.8rem;color:var(--gray);text-decoration:none;letter-spacing:.05em;transition:background .15s,color .15s}
+.dropdown a:hover{background:var(--light);color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:1.5rem}
+.nav-icon{background:none;border:none;cursor:pointer;font-size:1.2rem;position:relative;color:var(--black)}
+.cart-badge{position:absolute;top:-6px;right:-8px;background:var(--accent);color:var(--white);border-radius:50%;width:18px;height:18px;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:600}
+
+/* ── SEARCH OVERLAY ── */
+.search-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;align-items:flex-start;justify-content:center;padding-top:12vh;backdrop-filter:blur(4px)}
+.search-overlay.open{display:flex}
+.search-box{background:var(--white);width:90%;max-width:600px;padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.search-box h3{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;margin-bottom:1rem}
+.search-input-row{display:flex;gap:.5rem}
+.search-input-row input{flex:1;padding:.8rem 1rem;border:1px solid var(--sand);font-family:'Jost',sans-serif;font-size:.9rem;outline:none}
+.search-input-row input:focus{border-color:var(--accent)}
+.search-input-row button{background:var(--black);color:var(--white);border:none;padding:.8rem 1.5rem;font-family:'Jost',sans-serif;font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer}
+.search-results{margin-top:1rem;color:var(--gray);font-size:.85rem}
+.search-close{float:right;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray)}
+
+/* ── NEWSLETTER ── */
+.newsletter-section{background:var(--black);padding:4rem 3rem;text-align:center}
+.newsletter-section .section-tag{color:var(--accent2);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;margin-bottom:.8rem}
+.newsletter-section h2{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--white);margin-bottom:.6rem}
+.newsletter-section p{color:var(--taupe);font-size:.88rem;margin-bottom:2rem}
+.newsletter-form{display:flex;gap:.5rem;max-width:480px;margin:0 auto}
+.newsletter-form input{flex:1;padding:.85rem 1.2rem;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:var(--white);font-family:'Jost',sans-serif;font-size:.85rem;outline:none}
+.newsletter-form input::placeholder{color:var(--taupe)}
+.newsletter-form input:focus{border-color:var(--accent2)}
+.newsletter-form button{background:var(--accent);color:var(--white);border:none;padding:.85rem 2rem;font-family:'Jost',sans-serif;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s;white-space:nowrap}
+.newsletter-form button:hover{background:var(--accent2)}
+.newsletter-success{display:none;color:var(--accent2);font-size:.85rem;margin-top:1rem}
+
+/* ── HERO ── */
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:88vh}
+.hero-left{background:var(--black);display:flex;flex-direction:column;justify-content:flex-end;padding:4rem;position:relative;overflow:hidden}
+.hero-left::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#1a1008 0%,#0c0c0c 100%)}
+.hero-bg-text{position:absolute;bottom:-2rem;right:-1rem;font-family:'Cormorant Garamond',serif;font-size:12rem;color:rgba(255,255,255,.03);line-height:1;pointer-events:none;white-space:nowrap}
+.hero-content{position:relative;z-index:1}
+.hero-tag{color:var(--accent2);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;margin-bottom:1.5rem}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,5vw,5.5rem);font-weight:300;line-height:1.05;color:var(--white);margin-bottom:1.5rem}
+.hero h1 em{font-style:italic;color:var(--accent2)}
+.hero p{color:var(--taupe);font-size:.95rem;line-height:1.8;max-width:380px;margin-bottom:2.5rem;font-weight:300}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{background:var(--accent);color:var(--white);border:none;padding:.9rem 2.2rem;font-family:'Jost',sans-serif;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.btn-primary:hover{background:var(--accent2)}
+.btn-outline{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.3);padding:.9rem 2.2rem;font-family:'Jost',sans-serif;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:border-color .2s,color .2s}
+.btn-outline:hover{border-color:var(--accent2);color:var(--accent2)}
+.hero-right{display:grid;grid-template-rows:1fr 1fr;background:var(--sand)}
+.hero-panel{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;cursor:pointer;transition:background .3s;padding:2rem;text-decoration:none}
+.hero-panel:hover{background:var(--taupe)}
+.hero-panel:first-child{border-bottom:1px solid rgba(0,0,0,.1)}
+.panel-emoji{font-size:5rem}
+.panel-label{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;letter-spacing:.1em;color:var(--black)}
+.panel-sub{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}
+
+/* ── CATEGORIES STRIP ── */
+.categories-strip{background:var(--white);padding:2rem 3rem;display:flex;gap:1rem;overflow-x:auto;border-bottom:1px solid var(--sand)}
+.cat-pill{flex-shrink:0;padding:.6rem 1.5rem;border:1px solid var(--sand);border-radius:30px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;background:var(--white);color:var(--gray);transition:all .2s}
+.cat-pill:hover,.cat-pill.active{background:var(--black);color:var(--white);border-color:var(--black)}
+
+/* ── SECTION ── */
+.section{padding:5rem 3rem}
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem}
+.section-header-left .section-tag{color:var(--accent);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;margin-bottom:.5rem}
+.section-header-left h2{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300}
+.view-all{font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gray);text-decoration:none;border-bottom:1px solid var(--taupe);padding-bottom:.2rem;transition:color .2s,border-color .2s;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none;font-family:'Jost',sans-serif}
+.view-all:hover{color:var(--accent);border-color:var(--accent)}
+
+/* ── PRODUCT GRID ── */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem}
+.product-card{background:var(--white);overflow:hidden;cursor:pointer;transition:transform .3s,box-shadow .3s;position:relative}
+.product-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.1)}
+.product-thumb{width:100%;height:300px;display:flex;align-items:center;justify-content:center;font-size:6rem;background:linear-gradient(135deg,var(--light),var(--sand));position:relative;overflow:hidden}
+.product-thumb::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .3s}
+.product-card:hover .product-thumb::after{background:rgba(0,0,0,.04)}
+.product-badge{position:absolute;top:.8rem;left:.8rem;background:var(--accent);color:var(--white);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .6rem}
+.product-wishlist{position:absolute;top:.8rem;right:.8rem;background:var(--white);border:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;opacity:0;transition:opacity .2s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.product-card:hover .product-wishlist{opacity:1}
+.product-info{padding:1.2rem 1rem 1rem}
+.product-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.product-category{color:var(--taupe);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase}
+.product-gender{font-size:.65rem;background:var(--light);color:var(--gray);padding:.15rem .4rem;border-radius:2px;letter-spacing:.05em}
+.product-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:400;margin-bottom:.4rem;line-height:1.2}
+.product-pricing{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.product-price{color:var(--accent);font-weight:500;font-size:.95rem}
+.product-old{color:var(--taupe);text-decoration:line-through;font-size:.82rem}
+.product-discount{background:#fef3ea;color:var(--accent);font-size:.68rem;padding:.15rem .4rem}
+.add-to-cart{width:100%;background:var(--black);color:var(--white);border:none;padding:.75rem;font-family:'Jost',sans-serif;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.add-to-cart:hover{background:var(--accent)}
+.add-to-cart.added{background:#3a7d55}
+
+/* ── BANNER ── */
+.banner-section{padding:0 3rem 5rem}
+.banner-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.banner{padding:4rem;display:flex;flex-direction:column;justify-content:flex-end;min-height:300px;text-decoration:none;position:relative;overflow:hidden;cursor:pointer}
+.banner-men{background:linear-gradient(135deg,#1a1a2e,#16213e)}
+.banner-women{background:linear-gradient(135deg,#2d1b1b,#4a2020)}
+.banner::before{content:attr(data-icon);position:absolute;right:-1rem;top:50%;transform:translateY(-50%);font-size:10rem;opacity:.15}
+.banner-tag{color:rgba(255,255,255,.6);font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;margin-bottom:.8rem}
+.banner h3{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--white);margin-bottom:1rem}
+.banner-link{color:rgba(255,255,255,.8);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:.2rem;display:inline-block;transition:color .2s}
+.banner:hover .banner-link{color:var(--accent2)}
+
+/* ── BRANDS ── */
+.brands-section{background:var(--white);padding:3rem;text-align:center;border-top:1px solid var(--sand);border-bottom:1px solid var(--sand)}
+.brands-label{font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--taupe);margin-bottom:2rem}
+.brands-row{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
+.brand-item{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;letter-spacing:.2em;color:var(--taupe);transition:color .2s;cursor:pointer}
+.brand-item:hover{color:var(--black)}
+
+/* ── CART DRAWER ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;backdrop-filter:blur(2px)}
+.overlay.open{display:block}
+.cart-drawer{position:fixed;top:0;right:-460px;width:460px;max-width:96vw;height:100vh;background:var(--white);z-index:501;transition:right .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.cart-drawer.open{right:0}
+.drawer-header{background:var(--black);color:var(--white);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.drawer-header h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;letter-spacing:.1em}
+.close-btn{background:none;border:none;color:var(--white);font-size:1.4rem;cursor:pointer;opacity:.7;transition:opacity .2s}
+.close-btn:hover{opacity:1}
+.drawer-body{flex:1;overflow-y:auto;padding:1.5rem 2rem}
+.empty-cart{text-align:center;padding:4rem 0;color:var(--taupe)}
+.empty-cart div{font-size:4rem;margin-bottom:1rem}
+.cart-item{display:flex;gap:1rem;padding:1.2rem 0;border-bottom:1px solid var(--sand);align-items:flex-start}
+.ci-img{width:70px;height:70px;background:var(--light);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;border-radius:2px}
+.ci-info{flex:1}
+.ci-name{font-family:'Cormorant Garamond',serif;font-size:1rem;margin-bottom:.2rem}
+.ci-price{color:var(--accent);font-size:.88rem;margin-bottom:.5rem}
+.ci-controls{display:flex;align-items:center;gap:.5rem}
+.qty-btn{background:var(--light);border:none;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;border-radius:2px;transition:background .15s}
+.qty-btn:hover{background:var(--sand)}
+.ci-qty{font-size:.85rem;min-width:20px;text-align:center}
+.ci-remove{background:none;border:none;color:var(--taupe);cursor:pointer;font-size:1rem;margin-left:auto;transition:color .2s}
+.ci-remove:hover{color:#c0392b}
+.drawer-footer{padding:1.5rem 2rem;border-top:1px solid var(--sand)}
+.subtotal-row{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.85rem;color:var(--gray)}
+.total-row{display:flex;justify-content:space-between;margin-bottom:1.5rem}
+.total-row span:first-child{font-size:1rem;font-weight:500}
+.total-row span:last-child{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--accent)}
+.checkout-btn{width:100%;background:var(--accent);color:var(--white);border:none;padding:1rem;font-family:'Jost',sans-serif;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-bottom:.8rem}
+.checkout-btn:hover{background:var(--accent2)}
+.continue-btn{width:100%;background:transparent;color:var(--gray);border:1px solid var(--sand);padding:.8rem;font-family:'Jost',sans-serif;font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.continue-btn:hover{border-color:var(--black);color:var(--black)}
+
+/* ── ORDER MODAL ── */
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;align-items:center;justify-content:center}
+.modal-wrap.open{display:flex}
+.modal{background:var(--white);padding:3.5rem;max-width:480px;width:90%;text-align:center}
+.modal-icon{font-size:4rem;margin-bottom:1.5rem}
+.modal h2{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:1rem}
+.modal p{color:var(--gray);line-height:1.8;margin-bottom:.5rem;font-size:.9rem}
+.modal-txn{font-family:'Jost',sans-serif;font-size:.75rem;letter-spacing:.1em;color:var(--taupe);margin-bottom:2rem}
+.modal-btn{background:var(--black);color:var(--white);border:none;padding:.9rem 2.5rem;font-family:'Jost',sans-serif;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--black);color:var(--white);padding:.9rem 2rem;font-size:.82rem;letter-spacing:.05em;z-index:700;transition:transform .35s cubic-bezier(.4,0,.2,1);white-space:nowrap;border-left:3px solid var(--accent)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── FOOTER ── */
+footer{background:var(--black);color:var(--taupe);padding:4rem 3rem 2rem}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.footer-brand .logo{color:var(--white);display:block;margin-bottom:1rem}
+.footer-brand p{font-size:.82rem;line-height:1.8;color:var(--taupe);max-width:260px}
+.footer-col h4{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);margin-bottom:1.2rem}
+.footer-col ul{list-style:none}
+.footer-col li{margin-bottom:.6rem}
+.footer-col a{color:var(--taupe);text-decoration:none;font-size:.82rem;transition:color .2s}
+.footer-col a:hover{color:var(--accent2)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem;display:flex;justify-content:space-between;font-size:.75rem;color:rgba(255,255,255,.3)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:0 1.5rem}
+  .hero{grid-template-columns:1fr}
+  .hero-right{display:none}
+  .section,.banner-section{padding:3rem 1.5rem}
+  .banner-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .categories-strip{padding:1.5rem}
+  .footer-bottom{flex-direction:column;gap:.5rem;text-align:center}
+  .newsletter-form{flex-direction:column}
+}
+@media(max-width:600px){
+  .nav-menu{display:none}
+  .hero h1{font-size:2.5rem}
+  .hero-left{padding:2.5rem}
+  .products-grid{grid-template-columns:1fr 1fr}
+  .product-thumb{height:200px;font-size:4rem}
+  .footer-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT -->
+<div class="announcement" id="announcementBar">
+  Free shipping on orders over $150 · <a href="#" onclick="trackAnnouncementClick('terms'); return false;">T&amp;Cs Apply</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="#" onclick="trackNavClick('logo','logo','header'); return false;">FashionStoreGA4</a>
+    <ul class="nav-menu">
+      <li>
+        <a href="#" onclick="filterCategory('all'); trackNavClick('Shop','menu','main_nav'); return false;">Shop</a>
+        <div class="dropdown">
+          <a href="#" onclick="filterCategory('all'); trackNavClick('All Products','dropdown','shop'); return false;">All Products</a>
+          <a href="#" onclick="filterCategory('new'); trackNavClick('New Arrivals','dropdown','shop'); return false;">New Arrivals</a>
+          <a href="#" onclick="filterCategory('sale'); trackNavClick('Sale','dropdown','shop'); return false;">Sale</a>
+        </div>
+      </li>
+      <li>
+        <a href="#" onclick="filterGender('women'); trackNavClick('Women','menu','main_nav'); return false;">Women</a>
+        <div class="dropdown">
+          <a href="#" onclick="filterGender('women'); trackNavClick('All Womens','dropdown','women'); return false;">All Women's</a>
+          <a href="#" onclick="filterCategoryGender('Dresses','women'); trackNavClick('Dresses','dropdown','women'); return false;">Dresses</a>
+          <a href="#" onclick="filterCategoryGender('Tops','women'); trackNavClick('Tops','dropdown','women'); return false;">Tops</a>
+          <a href="#" onclick="filterCategoryGender('Skirts','women'); trackNavClick('Skirts','dropdown','women'); return false;">Skirts</a>
+          <a href="#" onclick="filterCategoryGender('Knitwear','women'); trackNavClick('Knitwear','dropdown','women'); return false;">Knitwear</a>
+        </div>
+      </li>
+      <li>
+        <a href="#" onclick="filterGender('men'); trackNavClick('Men','menu','main_nav'); return false;">Men</a>
+        <div class="dropdown">
+          <a href="#" onclick="filterGender('men'); trackNavClick('All Mens','dropdown','men'); return false;">All Men's</a>
+          <a href="#" onclick="filterCategoryGender('Shirts','men'); trackNavClick('Shirts','dropdown','men'); return false;">Shirts</a>
+          <a href="#" onclick="filterCategoryGender('Trousers','men'); trackNavClick('Trousers','dropdown','men'); return false;">Trousers</a>
+          <a href="#" onclick="filterCategoryGender('Jackets','men'); trackNavClick('Jackets','dropdown','men'); return false;">Jackets</a>
+          <a href="#" onclick="filterCategoryGender('Knitwear','men'); trackNavClick('Knitwear','dropdown','men'); return false;">Knitwear</a>
+        </div>
+      </li>
+      <li>
+        <a href="#" onclick="filterCategory('Accessories'); trackNavClick('Accessories','menu','main_nav'); return false;">Accessories</a>
+      </li>
+      <li>
+        <a href="https://www.vogue.com" target="_blank" onclick="trackOutboundClick('https://www.vogue.com','Style Blog','main_nav')">Style Blog ↗</a>
+      </li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-icon" onclick="openSearch()" title="Search">🔍</button>
+      <button class="nav-icon" onclick="trackNavClick('wishlist','icon','header')" title="Wishlist">♡</button>
+      <button class="nav-icon" onclick="openCart()" title="Cart">
+        🛍
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
+  <div class="search-box">
+    <button class="search-close" onclick="closeSearch()">✕</button>
+    <h3>Search Products</h3>
+    <div class="search-input-row">
+      <input type="text" id="searchInput" placeholder="Search dresses, shirts, accessories..." autocomplete="off"/>
+      <button onclick="performSearch()">Search</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="heroBanner" data-promo-id="hero_ss25" data-promo-name="Spring/Summer 2025 Hero">
+  <div class="hero-left">
+    <div class="hero-bg-text">FashionStoreGA4</div>
+    <div class="hero-content">
+      <div class="hero-tag">Spring / Summer 2025 Collection</div>
+      <h1>Dress for<br>the Life You<br><em>Deserve</em></h1>
+      <p>Refined essentials and statement pieces for the modern wardrobe. Sustainably sourced, beautifully made.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="scrollShop(); trackPromotionSelect('hero_ss25','Spring/Summer 2025 Hero','shop_now','hero_cta_primary')">Shop Now</button>
+        <button class="btn-outline" onclick="filterCategory('new'); trackPromotionSelect('hero_ss25','Spring/Summer 2025 Hero','new_arrivals','hero_cta_secondary')">New Arrivals</button>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <a class="hero-panel" href="#" onclick="filterGender('women'); trackPromotionSelect('hero_women','Women Collection Panel','view_collection','hero_panel_women'); return false;">
+      <div class="panel-emoji">👗</div>
+      <div class="panel-label">Women</div>
+      <div class="panel-sub">View Collection</div>
+    </a>
+    <a class="hero-panel" href="#" onclick="filterGender('men'); trackPromotionSelect('hero_men','Men Collection Panel','view_collection','hero_panel_men'); return false;">
+      <div class="panel-emoji">🧥</div>
+      <div class="panel-label">Men</div>
+      <div class="panel-sub">View Collection</div>
+    </a>
+  </div>
+</div>
+
+<!-- CATEGORY PILLS -->
+<div class="categories-strip" id="categoryStrip">
+  <button class="cat-pill active" onclick="filterCategory('all')">All</button>
+  <button class="cat-pill" onclick="filterGender('women')">Women</button>
+  <button class="cat-pill" onclick="filterGender('men')">Men</button>
+  <button class="cat-pill" onclick="filterCategory('new')">New Arrivals</button>
+  <button class="cat-pill" onclick="filterCategory('sale')">Sale</button>
+  <button class="cat-pill" onclick="filterCategoryGender('Dresses','women')">Dresses</button>
+  <button class="cat-pill" onclick="filterCategoryGender('Tops','women')">Tops</button>
+  <button class="cat-pill" onclick="filterCategoryGender('Shirts','men')">Shirts</button>
+  <button class="cat-pill" onclick="filterCategoryGender('Jackets','men')">Jackets</button>
+  <button class="cat-pill" onclick="filterCategory('Accessories')">Accessories</button>
+  <button class="cat-pill" onclick="filterCategory('Knitwear')">Knitwear</button>
+</div>
+
+<!-- PRODUCTS -->
+<section class="section" id="shopSection">
+  <div class="section-header">
+    <div class="section-header-left">
+      <div class="section-tag">Curated For You</div>
+      <h2 id="sectionTitle">Featured Collection</h2>
+    </div>
+    <button class="view-all" onclick="filterCategory('all'); trackViewAll()">View All →</button>
+  </div>
+  <div class="products-grid" id="productsGrid"></div>
+</section>
+
+<!-- SHOP BY GENDER BANNERS -->
+<div class="banner-section" id="bannerSection">
+  <div class="banner-grid">
+    <a class="banner banner-men" data-icon="🧥" data-promo-id="banner_men" data-promo-name="Menswear Banner" href="#" onclick="filterGender('men'); trackPromotionSelect('banner_men','Menswear Banner','shop_mens','gender_banner_left'); return false;">
+      <div class="banner-tag">Menswear</div>
+      <h3>The Modern<br>Gentleman</h3>
+      <span class="banner-link">Shop Men's →</span>
+    </a>
+    <a class="banner banner-women" data-icon="👗" data-promo-id="banner_women" data-promo-name="Womenswear Banner" href="#" onclick="filterGender('women'); trackPromotionSelect('banner_women','Womenswear Banner','shop_womens','gender_banner_right'); return false;">
+      <div class="banner-tag">Womenswear</div>
+      <h3>Effortless<br>Elegance</h3>
+      <span class="banner-link">Shop Women's →</span>
+    </a>
+  </div>
+</div>
+
+<!-- NEWSLETTER SIGNUP -->
+<div class="newsletter-section" id="newsletterSection">
+  <div class="section-tag">Stay in the Loop</div>
+  <h2>Get 10% Off Your First Order</h2>
+  <p>Subscribe for exclusive drops, style tips, and early access to sales.</p>
+  <div class="newsletter-form" id="newsletterForm">
+    <input type="email" id="newsletterEmail" placeholder="Enter your email address" onfocus="trackNewsletterFocus()"/>
+    <button onclick="submitNewsletter()">Subscribe</button>
+  </div>
+  <div class="newsletter-success" id="newsletterSuccess">✓ Welcome! Check your inbox for your 10% discount code.</div>
+</div>
+
+<!-- BRANDS -->
+<div class="brands-section" id="brandsSection">
+  <div class="brands-label">As featured in</div>
+  <div class="brands-row">
+    <a class="brand-item" href="https://www.vogue.com" target="_blank" onclick="trackOutboundClick('https://www.vogue.com','VOGUE','brands_section')">VOGUE</a>
+    <a class="brand-item" href="https://www.harpersbazaar.com" target="_blank" onclick="trackOutboundClick('https://www.harpersbazaar.com','Harpers Bazaar','brands_section')">HARPER'S BAZAAR</a>
+    <a class="brand-item" href="https://www.elle.com" target="_blank" onclick="trackOutboundClick('https://www.elle.com','ELLE','brands_section')">ELLE</a>
+    <a class="brand-item" href="https://www.gq.com" target="_blank" onclick="trackOutboundClick('https://www.gq.com','GQ','brands_section')">GQ</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="siteFooter">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="logo" href="#">FashionStoreGA4</a>
+      <p>Premium fashion curated for the modern lifestyle. Timeless pieces, sustainable practices, exceptional quality.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#" onclick="filterGender('women'); trackFooterClick('Women','shop'); return false;">Women</a></li>
+        <li><a href="#" onclick="filterGender('men'); trackFooterClick('Men','shop'); return false;">Men</a></li>
+        <li><a href="#" onclick="filterCategory('new'); trackFooterClick('New Arrivals','shop'); return false;">New Arrivals</a></li>
+        <li><a href="#" onclick="filterCategory('sale'); trackFooterClick('Sale','shop'); return false;">Sale</a></li>
+        <li><a href="#" onclick="filterCategory('Accessories'); trackFooterClick('Accessories','shop'); return false;">Accessories</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Help</h4>
+      <ul>
+        <li><a href="https://www.royalmail.com/track-my-post" target="_blank" onclick="trackOutboundClick('https://www.royalmail.com/track-my-post','Track Order','footer_help')">Track Order ↗</a></li>
+        <li><a href="#" onclick="trackFooterClick('Returns','help'); return false;">Returns</a></li>
+        <li><a href="#" onclick="trackFooterClick('Size Guide','help'); return false;">Size Guide</a></li>
+        <li><a href="#" onclick="trackFooterClick('Contact Us','help'); return false;">Contact Us</a></li>
+        <li><a href="#" onclick="trackFooterClick('FAQ','help'); return false;">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="https://www.instagram.com" target="_blank" onclick="trackSocialClick('instagram','footer')">Instagram ↗</a></li>
+        <li><a href="https://www.pinterest.com" target="_blank" onclick="trackSocialClick('pinterest','footer')">Pinterest ↗</a></li>
+        <li><a href="https://www.tiktok.com" target="_blank" onclick="trackSocialClick('tiktok','footer')">TikTok ↗</a></li>
+        <li><a href="https://www.facebook.com" target="_blank" onclick="trackSocialClick('facebook','footer')">Facebook ↗</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 FashionStoreGA4 Fashion. All rights reserved.</span>
+    <span>GA4 Practice Store · Measurement ID: G-BGG9XX4S3P</span>
+  </div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header">
+    <h3>Shopping Bag</h3>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="drawer-body" id="cartBody">
+    <div class="empty-cart"><div>🛍</div>Your bag is empty</div>
+  </div>
+  <div class="drawer-footer">
+    <div class="subtotal-row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+    <div class="subtotal-row"><span>Shipping</span><span>Calculated at checkout</span></div>
+    <div class="total-row"><span>Estimated Total</span><span id="cartTotal">$0.00</span></div>
+    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+    <button class="continue-btn" onclick="trackContinueShopping(); closeCart()">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="modal-wrap" id="orderModal">
+  <div class="modal">
+    <div class="modal-icon">✅</div>
+    <h2>Order Confirmed!</h2>
+    <p>Thank you for shopping with FashionStoreGA4. Your order has been placed and you'll receive a confirmation email shortly.</p>
+    <p class="modal-txn" id="txnId">Transaction ID: —</p>
+    <button class="modal-btn" onclick="closeModal()">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// PRODUCT DATA
+// ══════════════════════════════════════════════════════════════════
+const products = [
+  // WOMEN
+  {id:'W001',name:'Silk Wrap Dress',category:'Dresses',gender:'women',price:128,oldPrice:165,emoji:'👗',badge:'New',brand:'FashionStoreGA4'},
+  {id:'W002',name:'Linen Blazer Set',category:'Jackets',gender:'women',price:195,oldPrice:null,emoji:'🧥',badge:null,brand:'FashionStoreGA4'},
+  {id:'W003',name:'Silk Cami Top',category:'Tops',gender:'women',price:68,oldPrice:90,emoji:'👚',badge:'Sale',brand:'FashionStoreGA4'},
+  {id:'W004',name:'Pleated Midi Skirt',category:'Skirts',gender:'women',price:88,oldPrice:null,emoji:'👘',badge:'New',brand:'FashionStoreGA4'},
+  {id:'W005',name:'Cashmere Turtleneck',category:'Knitwear',gender:'women',price:185,oldPrice:240,emoji:'🧶',badge:'Sale',brand:'FashionStoreGA4'},
+  {id:'W006',name:'High Waist Trousers',category:'Trousers',gender:'women',price:110,oldPrice:null,emoji:'👖',badge:null,brand:'FashionStoreGA4'},
+  {id:'W007',name:'Satin Evening Blouse',category:'Tops',gender:'women',price:95,oldPrice:125,emoji:'✨',badge:'Sale',brand:'FashionStoreGA4'},
+  {id:'W008',name:'Floral Maxi Dress',category:'Dresses',gender:'women',price:148,oldPrice:null,emoji:'🌸',badge:'New',brand:'FashionStoreGA4'},
+  // MEN
+  {id:'M001',name:'Oxford Button Shirt',category:'Shirts',gender:'men',price:85,oldPrice:null,emoji:'👔',badge:'New',brand:'FashionStoreGA4'},
+  {id:'M002',name:'Slim Wool Trousers',category:'Trousers',gender:'men',price:130,oldPrice:165,emoji:'👖',badge:'Sale',brand:'FashionStoreGA4'},
+  {id:'M003',name:'Structured Blazer',category:'Jackets',gender:'men',price:220,oldPrice:null,emoji:'🧥',badge:null,brand:'FashionStoreGA4'},
+  {id:'M004',name:'Merino Crew Sweater',category:'Knitwear',gender:'men',price:155,oldPrice:195,emoji:'🧶',badge:'Sale',brand:'FashionStoreGA4'},
+  {id:'M005',name:'Linen Chino Trousers',category:'Trousers',gender:'men',price:98,oldPrice:null,emoji:'👒',badge:'New',brand:'FashionStoreGA4'},
+  {id:'M006',name:'Classic Polo Shirt',category:'Shirts',gender:'men',price:72,oldPrice:95,emoji:'🏌️',badge:'Sale',brand:'FashionStoreGA4'},
+  // ACCESSORIES (unisex)
+  {id:'A001',name:'Leather Tote Bag',category:'Accessories',gender:'unisex',price:175,oldPrice:null,emoji:'👜',badge:'New',brand:'FashionStoreGA4'},
+  {id:'A002',name:'Silk Scarf',category:'Accessories',gender:'unisex',price:55,oldPrice:75,emoji:'🧣',badge:'Sale',brand:'FashionStoreGA4'},
+  {id:'A003',name:'Canvas Weekend Bag',category:'Accessories',gender:'unisex',price:130,oldPrice:null,emoji:'🎒',badge:null,brand:'FashionStoreGA4'},
+];
+
+let cart = [];
+let txnCounter = 1000;
+let currentFilter = {type:'all', value:'all'};
+
+
+// ══════════════════════════════════════════════════════════════════
+// 1. SCROLL DEPTH TRACKING
+// ══════════════════════════════════════════════════════════════════
+(function initScrollTracking() {
+  const milestones = [10, 25, 50, 75, 90, 100];
+  window.addEventListener('scroll', function() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    const pct = Math.round((scrollTop / docHeight) * 100);
+
+    milestones.forEach(function(m) {
+      if (pct >= m && !GA4.scrollMilestones.has(m)) {
+        GA4.scrollMilestones.add(m);
+        GA4.track('scroll_depth', {
+          percent_scrolled: m,
+          page_section: getCurrentSection()
+        });
+      }
+    });
+  }, {passive: true});
+})();
+
+function getCurrentSection() {
+  const sections = ['heroBanner','categoryStrip','shopSection','bannerSection','newsletterSection','brandsSection','siteFooter'];
+  let current = 'top';
+  sections.forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < window.innerHeight * 0.5) current = id;
+  });
+  return current;
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 2. TIME ON PAGE / ENGAGEMENT MILESTONES
+// ══════════════════════════════════════════════════════════════════
+(function initTimeMilestones() {
+  const intervals = [10, 30, 60, 120, 300]; // seconds
+  intervals.forEach(function(sec) {
+    setTimeout(function() {
+      if (!GA4.timeMilestones.has(sec)) {
+        GA4.timeMilestones.add(sec);
+        GA4.track('time_on_page_milestone', {
+          seconds: sec,
+          page_section: getCurrentSection(),
+          items_in_cart: cart.reduce(function(s,i){ return s+i.qty; }, 0)
+        });
+      }
+    }, sec * 1000);
+  });
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// 3. INTERSECTION OBSERVER — view_promotion for banners
+// ══════════════════════════════════════════════════════════════════
+(function initPromotionViewTracking() {
+  const promoElements = [
+    { selector: '#heroBanner', id: 'hero_ss25', name: 'Spring/Summer 2025 Hero', slot: 'hero_main' },
+    { selector: '.banner-men', id: 'banner_men', name: 'Menswear Banner', slot: 'gender_banner_left' },
+    { selector: '.banner-women', id: 'banner_women', name: 'Womenswear Banner', slot: 'gender_banner_right' },
+    { selector: '#newsletterSection', id: 'newsletter_cta', name: 'Newsletter 10% Off', slot: 'newsletter_section' }
+  ];
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const config = promoElements.find(function(p) { return document.querySelector(p.selector) === entry.target; });
+        if (config && !GA4.viewedPromotions.has(config.id)) {
+          GA4.viewedPromotions.add(config.id);
+          GA4.track('view_promotion', {
+            promotion_id: config.id,
+            promotion_name: config.name,
+            creative_name: config.name,
+            creative_slot: config.slot,
+            location_id: config.slot
+          });
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+
+  // Observe after DOM is ready
+  setTimeout(function() {
+    promoElements.forEach(function(p) {
+      const el = document.querySelector(p.selector);
+      if (el) observer.observe(el);
+    });
+  }, 100);
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// 4. PRODUCT IMPRESSION OBSERVER — view_item fired when scrolled into view
+// ══════════════════════════════════════════════════════════════════
+let productObserver;
+(function initProductViewTracking() {
+  productObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const id = entry.target.dataset.productId;
+        if (id && !GA4.viewedProducts.has(id)) {
+          GA4.viewedProducts.add(id);
+          // We batch these — individual view_item tracked on click
+        }
+      }
+    });
+  }, { threshold: 0.6 });
+})();
+
+function observeProductCards() {
+  document.querySelectorAll('.product-card').forEach(function(card) {
+    productObserver.observe(card);
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 5. PAGE VISIBILITY — track when users leave/return
+// ══════════════════════════════════════════════════════════════════
+(function initVisibilityTracking() {
+  let hiddenAt = null;
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      hiddenAt = Date.now();
+      GA4.track('page_hidden', {
+        time_on_page_seconds: Math.round((Date.now() - GA4.sessionStart) / 1000),
+        items_in_cart: cart.reduce(function(s,i){ return s+i.qty; }, 0)
+      });
+    } else if (hiddenAt) {
+      const awaySeconds = Math.round((Date.now() - hiddenAt) / 1000);
+      GA4.track('page_visible', {
+        seconds_away: awaySeconds,
+        items_in_cart: cart.reduce(function(s,i){ return s+i.qty; }, 0)
+      });
+      hiddenAt = null;
+    }
+  });
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// 6. FILTER & RENDER (with comprehensive tracking)
+// ══════════════════════════════════════════════════════════════════
+function getFiltered() {
+  const {type, value} = currentFilter;
+  if (type === 'all') return products;
+  if (type === 'gender') return products.filter(function(p) { return p.gender === value || p.gender === 'unisex'; });
+  if (type === 'category') return products.filter(function(p) { return p.category === value; });
+  if (type === 'categoryGender') return products.filter(function(p) { return p.category === value.cat && (p.gender === value.gender || p.gender === 'unisex'); });
+  if (type === 'badge') return products.filter(function(p) { return p.badge && p.badge.toLowerCase() === value; });
+  return products;
+}
+
+function filterCategory(val) {
+  scrollShop();
+  let listName;
+  if (val === 'all') {
+    currentFilter = {type:'all', value:'all'};
+    listName = 'Featured Collection';
+  } else if (val === 'new') {
+    currentFilter = {type:'badge', value:'new'};
+    listName = 'New Arrivals';
+  } else if (val === 'sale') {
+    currentFilter = {type:'badge', value:'sale'};
+    listName = 'Sale Items';
+  } else {
+    currentFilter = {type:'category', value:val};
+    listName = val;
+  }
+  document.getElementById('sectionTitle').textContent = listName;
+  setPillActive(val);
+  renderProducts();
+
+  // GA4: filter tracking with full context
+  GA4.track('filter_products', {
+    filter_type: 'category',
+    filter_value: val,
+    results_count: getFiltered().length,
+    item_list_name: listName
+  });
+  return false;
+}
+
+function filterGender(gender) {
+  scrollShop();
+  currentFilter = {type:'gender', value:gender};
+  const listName = gender === 'women' ? "Women's Collection" : "Men's Collection";
+  document.getElementById('sectionTitle').textContent = listName;
+  setPillActive(gender);
+  renderProducts();
+
+  GA4.track('filter_products', {
+    filter_type: 'gender',
+    filter_value: gender,
+    results_count: getFiltered().length,
+    item_list_name: listName
+  });
+  return false;
+}
+
+function filterCategoryGender(cat, gender) {
+  scrollShop();
+  currentFilter = {type:'categoryGender', value:{cat, gender}};
+  document.getElementById('sectionTitle').textContent = cat;
+  setPillActive(cat.toLowerCase());
+  renderProducts();
+
+  GA4.track('filter_products', {
+    filter_type: 'category_gender',
+    filter_value: cat + '_' + gender,
+    filter_category: cat,
+    filter_gender: gender,
+    results_count: getFiltered().length,
+    item_list_name: cat
+  });
+  return false;
+}
+
+function setPillActive(key) {
+  document.querySelectorAll('.cat-pill').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.cat-pill').forEach(function(p) {
+    if (p.textContent.toLowerCase().replace(/\s/g,'').includes(key.toLowerCase().replace(/\s/g,''))) {
+      p.classList.add('active');
+    }
+  });
+}
+
+function renderProducts() {
+  const filtered = getFiltered();
+  const grid = document.getElementById('productsGrid');
+  const listName = document.getElementById('sectionTitle').textContent;
+  const listId = 'list_' + listName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--taupe)">No products found</div>';
+
+    // GA4: Track empty results
+    GA4.track('view_item_list', {
+      item_list_id: listId,
+      item_list_name: listName,
+      items: []
+    });
+    return;
+  }
+
+  grid.innerHTML = filtered.map(function(p, i) {
+    const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+    return `
+    <div class="product-card" data-product-id="${p.id}" onclick="selectAndViewProduct('${p.id}', '${listName}', '${listId}', ${i+1})">
+      <div class="product-thumb">
+        ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+        <button class="product-wishlist" onclick="event.stopPropagation(); wishlist('${p.id}', '${listName}', '${listId}', ${i+1})">♡</button>
+        ${p.emoji}
+      </div>
+      <div class="product-info">
+        <div class="product-meta">
+          <span class="product-category">${p.category}</span>
+          <span class="product-gender">${p.gender}</span>
+        </div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-pricing">
+          <span class="product-price">$${p.price}</span>
+          ${p.oldPrice ? `<span class="product-old">$${p.oldPrice}</span><span class="product-discount">-${disc}%</span>` : ''}
+        </div>
+        <button class="add-to-cart" id="btn-${p.id}" onclick="event.stopPropagation(); addToCart('${p.id}', '${listName}', '${listId}', ${i+1})">Add to Bag</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // GA4: view_item_list with full item params
+  GA4.track('view_item_list', {
+    item_list_id: listId,
+    item_list_name: listName,
+    items: GA4.buildItemList(filtered, listName, listId)
+  });
+
+  // Observe new product cards for visibility
+  observeProductCards();
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 7. PRODUCT INTERACTIONS (select_item + view_item + add_to_cart)
+// ══════════════════════════════════════════════════════════════════
+function selectAndViewProduct(id, listName, listId, index) {
+  const p = products.find(function(x) { return x.id === id; });
+
+  // GA4: select_item — user clicked a product from a list
+  GA4.track('select_item', {
+    item_list_id: listId,
+    item_list_name: listName,
+    items: [GA4.buildItem(p, { item_list_id: listId, item_list_name: listName, index: index })]
+  });
+
+  // GA4: view_item — product detail view
+  GA4.track('view_item', {
+    currency: GA4.CURRENCY,
+    value: p.price,
+    items: [GA4.buildItem(p, { item_list_id: listId, item_list_name: listName, index: index })]
+  });
+
+  showToast(`Viewing: ${p.name}`);
+}
+
+function addToCart(id, listName, listId, index) {
+  const p = products.find(function(x) { return x.id === id; });
+  const ex = cart.find(function(x) { return x.id === id; });
+  const prevQty = ex ? ex.qty : 0;
+  if (ex) ex.qty++; else cart.push({...p, qty:1});
+
+  // GA4: add_to_cart with ALL recommended params
+  GA4.track('add_to_cart', {
+    currency: GA4.CURRENCY,
+    value: p.price,
+    items: [GA4.buildItem(p, {
+      quantity: 1,
+      item_list_id: listId,
+      item_list_name: listName,
+      index: index
+    })]
+  });
+
+  // Custom: track if adding a duplicate (upsell signal)
+  if (prevQty > 0) {
+    GA4.track('add_to_cart_repeat', {
+      item_id: p.id,
+      item_name: p.name,
+      previous_quantity: prevQty,
+      new_quantity: prevQty + 1
+    });
+  }
+
+  updateCartUI();
+  showToast(`${p.emoji} ${p.name} added to bag!`);
+
+  const btn = document.getElementById('btn-' + id);
+  if (btn) {
+    btn.textContent = '✓ Added'; btn.classList.add('added');
+    setTimeout(function() { btn.textContent = 'Add to Bag'; btn.classList.remove('added'); }, 1800);
+  }
+}
+
+function removeFromCart(id) {
+  const p = cart.find(function(x) { return x.id === id; });
+  if (!p) return;
+
+  // GA4: remove_from_cart with full params
+  GA4.track('remove_from_cart', {
+    currency: GA4.CURRENCY,
+    value: p.price * p.qty,
+    items: [GA4.buildItem(p, { quantity: p.qty })]
+  });
+
+  cart = cart.filter(function(x) { return x.id !== id; });
+  updateCartUI();
+}
+
+function changeQty(id, d) {
+  const item = cart.find(function(x) { return x.id === id; });
+  if (!item) return;
+  const oldQty = item.qty;
+  item.qty += d;
+
+  if (item.qty <= 0) { removeFromCart(id); return; }
+
+  // GA4: custom event for qty change
+  GA4.track('cart_quantity_change', {
+    item_id: item.id,
+    item_name: item.name,
+    item_category: item.category,
+    previous_quantity: oldQty,
+    new_quantity: item.qty,
+    direction: d > 0 ? 'increase' : 'decrease',
+    cart_value: cart.reduce(function(s,i){ return s+i.price*i.qty; },0)
+  });
+
+  updateCartUI();
+}
+
+function wishlist(id, listName, listId, index) {
+  const p = products.find(function(x) { return x.id === id; });
+
+  // GA4: add_to_wishlist with full params
+  GA4.track('add_to_wishlist', {
+    currency: GA4.CURRENCY,
+    value: p.price,
+    items: [GA4.buildItem(p, {
+      item_list_id: listId || undefined,
+      item_list_name: listName || undefined,
+      index: index || undefined
+    })]
+  });
+
+  showToast(`${p.emoji} ${p.name} saved to wishlist!`);
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 8. CART UI
+// ══════════════════════════════════════════════════════════════════
+function updateCartUI() {
+  const total = cart.reduce(function(s,i) { return s + i.price*i.qty; }, 0);
+  const count = cart.reduce(function(s,i) { return s + i.qty; }, 0);
+  document.getElementById('cartBadge').textContent = count;
+  document.getElementById('cartSubtotal').textContent = '$' + total.toFixed(2);
+  document.getElementById('cartTotal').textContent = '$' + total.toFixed(2);
+
+  const body = document.getElementById('cartBody');
+  if (!cart.length) {
+    body.innerHTML = '<div class="empty-cart"><div>🛍</div>Your bag is empty</div>';
+  } else {
+    body.innerHTML = cart.map(function(i) { return `
+      <div class="cart-item">
+        <div class="ci-img">${i.emoji}</div>
+        <div class="ci-info">
+          <div class="ci-name">${i.name}</div>
+          <div class="ci-price">$${i.price} · ${i.gender}</div>
+          <div class="ci-controls">
+            <button class="qty-btn" onclick="changeQty('${i.id}',-1)">−</button>
+            <span class="ci-qty">${i.qty}</span>
+            <button class="qty-btn" onclick="changeQty('${i.id}',1)">+</button>
+          </div>
+        </div>
+        <button class="ci-remove" onclick="removeFromCart('${i.id}')">🗑</button>
+      </div>`; }).join('');
+  }
+}
+
+function openCart() {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('cartDrawer').classList.add('open');
+
+  // GA4: view_cart with full item params
+  const total = cart.reduce(function(s,i) { return s+i.price*i.qty; }, 0);
+  const count = cart.reduce(function(s,i) { return s+i.qty; }, 0);
+  GA4.track('view_cart', {
+    currency: GA4.CURRENCY,
+    value: total,
+    items: cart.map(function(i) { return GA4.buildItem(i, { quantity: i.qty }); }),
+    cart_item_count: count
+  });
+}
+
+function closeCart() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('cartDrawer').classList.remove('open');
+
+  // GA4: custom cart_close event
+  GA4.track('cart_close', {
+    cart_value: cart.reduce(function(s,i){ return s+i.price*i.qty; },0),
+    cart_item_count: cart.reduce(function(s,i){ return s+i.qty; },0),
+    is_empty: cart.length === 0
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 9. CHECKOUT & PURCHASE (full ecommerce funnel)
+// ══════════════════════════════════════════════════════════════════
+function checkout() {
+  if (!cart.length) {
+    showToast('Your bag is empty!');
+    GA4.track('checkout_attempt_empty', {});
+    return;
+  }
+
+  const total = cart.reduce(function(s,i) { return s+i.price*i.qty; }, 0);
+  const count = cart.reduce(function(s,i) { return s+i.qty; }, 0);
+  const items = cart.map(function(i) { return GA4.buildItem(i, { quantity: i.qty }); });
+
+  // GA4: begin_checkout
+  GA4.track('begin_checkout', {
+    currency: GA4.CURRENCY,
+    value: total,
+    items: items,
+    coupon: undefined // No coupon system yet — param ready
+  });
+
+  // Simulate add_shipping_info step
+  setTimeout(function() {
+    GA4.track('add_shipping_info', {
+      currency: GA4.CURRENCY,
+      value: total,
+      shipping_tier: 'free_standard',
+      items: items
+    });
+  }, 150);
+
+  // Simulate add_payment_info step
+  setTimeout(function() {
+    GA4.track('add_payment_info', {
+      currency: GA4.CURRENCY,
+      value: total,
+      payment_type: 'credit_card',
+      items: items
+    });
+  }, 280);
+
+  // GA4: purchase
+  setTimeout(function() {
+    const txnId = 'FashionStoreGA4-' + (++txnCounter);
+    const tax = parseFloat((total * 0.1).toFixed(2));
+
+    GA4.track('purchase', {
+      transaction_id: txnId,
+      value: total,
+      currency: GA4.CURRENCY,
+      tax: tax,
+      shipping: 0,
+      affiliation: GA4.AFFILIATION,
+      coupon: undefined,
+      items: items
+    });
+
+    // Custom: purchase summary for reporting
+    GA4.track('purchase_summary', {
+      transaction_id: txnId,
+      total_value: total,
+      total_items: count,
+      unique_products: cart.length,
+      avg_item_price: parseFloat((total / count).toFixed(2)),
+      has_sale_items: cart.some(function(i){ return i.oldPrice; }),
+      categories_purchased: [...new Set(cart.map(function(i){ return i.category; }))].join(','),
+      genders_purchased: [...new Set(cart.map(function(i){ return i.gender; }))].join(',')
+    });
+
+    cart = [];
+    updateCartUI();
+    closeCart();
+    document.getElementById('txnId').textContent = 'Transaction: ' + txnId;
+    document.getElementById('orderModal').classList.add('open');
+  }, 400);
+}
+
+function closeModal() {
+  document.getElementById('orderModal').classList.remove('open');
+
+  // GA4: post-purchase continue shopping
+  GA4.track('post_purchase_continue', {
+    action: 'continue_shopping'
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 10. SEARCH TRACKING
+// ══════════════════════════════════════════════════════════════════
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+  setTimeout(function() { document.getElementById('searchInput').focus(); }, 100);
+
+  GA4.track('search_open', {
+    method: 'icon_click'
+  });
+}
+
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+
+  GA4.track('search_close', {
+    search_term: document.getElementById('searchInput').value || ''
+  });
+}
+
+function performSearch() {
+  const term = document.getElementById('searchInput').value.trim();
+  if (!term) return;
+
+  const results = products.filter(function(p) {
+    const haystack = (p.name + ' ' + p.category + ' ' + p.gender + ' ' + p.brand).toLowerCase();
+    return haystack.includes(term.toLowerCase());
+  });
+
+  // GA4: search event (recommended event)
+  GA4.track('search', {
+    search_term: term,
+    search_results_count: results.length
+  });
+
+  const resultsDiv = document.getElementById('searchResults');
+  if (results.length === 0) {
+    resultsDiv.innerHTML = 'No results found for "' + term + '"';
+
+    GA4.track('search_no_results', {
+      search_term: term
+    });
+  } else {
+    resultsDiv.innerHTML = results.length + ' result(s) found. <a href="#" onclick="applySearchResults(\'' + term + '\'); return false;" style="color:var(--accent)">View results →</a>';
+  }
+}
+
+function applySearchResults(term) {
+  closeSearch();
+  const results = products.filter(function(p) {
+    const haystack = (p.name + ' ' + p.category + ' ' + p.gender + ' ' + p.brand).toLowerCase();
+    return haystack.includes(term.toLowerCase());
+  });
+
+  // Apply as a custom filter
+  currentFilter = {type:'all', value:'all'};
+  document.getElementById('sectionTitle').textContent = 'Results for "' + term + '"';
+  scrollShop();
+
+  const grid = document.getElementById('productsGrid');
+  const listName = 'Search: ' + term;
+  const listId = 'search_' + term.replace(/\s/g,'_');
+
+  grid.innerHTML = results.map(function(p, i) {
+    const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+    return `
+    <div class="product-card" data-product-id="${p.id}" onclick="selectAndViewProduct('${p.id}', '${listName}', '${listId}', ${i+1})">
+      <div class="product-thumb">
+        ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+        <button class="product-wishlist" onclick="event.stopPropagation(); wishlist('${p.id}', '${listName}', '${listId}', ${i+1})">♡</button>
+        ${p.emoji}
+      </div>
+      <div class="product-info">
+        <div class="product-meta">
+          <span class="product-category">${p.category}</span>
+          <span class="product-gender">${p.gender}</span>
+        </div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-pricing">
+          <span class="product-price">$${p.price}</span>
+          ${p.oldPrice ? `<span class="product-old">$${p.oldPrice}</span><span class="product-discount">-${disc}%</span>` : ''}
+        </div>
+        <button class="add-to-cart" id="btn-${p.id}" onclick="event.stopPropagation(); addToCart('${p.id}', '${listName}', '${listId}', ${i+1})">Add to Bag</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // GA4: view_item_list for search results
+  GA4.track('view_item_list', {
+    item_list_id: listId,
+    item_list_name: listName,
+    items: GA4.buildItemList(results, listName, listId)
+  });
+
+  observeProductCards();
+}
+
+// Search on Enter key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('searchOverlay').classList.contains('open')) {
+    performSearch();
+  }
+  if (e.key === 'Escape' && document.getElementById('searchOverlay').classList.contains('open')) {
+    closeSearch();
+  }
+});
+
+
+// ══════════════════════════════════════════════════════════════════
+// 11. NEWSLETTER / LEAD GENERATION
+// ══════════════════════════════════════════════════════════════════
+let newsletterFocused = false;
+
+function trackNewsletterFocus() {
+  if (!newsletterFocused) {
+    newsletterFocused = true;
+    GA4.track('newsletter_form_start', {
+      form_name: 'newsletter_signup',
+      location: 'newsletter_section'
+    });
+  }
+}
+
+function submitNewsletter() {
+  const email = document.getElementById('newsletterEmail').value.trim();
+  if (!email || !email.includes('@')) {
+    showToast('Please enter a valid email address');
+
+    GA4.track('newsletter_form_error', {
+      form_name: 'newsletter_signup',
+      error_type: email ? 'invalid_email' : 'empty_field'
+    });
+    return;
+  }
+
+  // GA4: generate_lead (recommended event)
+  GA4.track('generate_lead', {
+    currency: GA4.CURRENCY,
+    value: 10, // Estimated lead value
+    lead_source: 'newsletter_signup',
+    method: 'email'
+  });
+
+  // GA4: sign_up (recommended event)
+  GA4.track('sign_up', {
+    method: 'newsletter_email'
+  });
+
+  // Custom: newsletter-specific tracking
+  GA4.track('newsletter_subscribe', {
+    form_name: 'newsletter_signup',
+    email_domain: email.split('@')[1],
+    page_section: 'newsletter_section',
+    items_in_cart: cart.reduce(function(s,i){ return s+i.qty; },0)
+  });
+
+  document.getElementById('newsletterForm').style.display = 'none';
+  document.getElementById('newsletterSuccess').style.display = 'block';
+  showToast('✓ Welcome! Check your inbox for your discount code.');
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 12. NAVIGATION & UI TRACKING HELPERS
+// ══════════════════════════════════════════════════════════════════
+
+// Announcement bar click
+function trackAnnouncementClick(label) {
+  GA4.track('select_promotion', {
+    promotion_id: 'announcement_bar',
+    promotion_name: 'Free Shipping Announcement',
+    creative_slot: 'announcement_bar',
+    creative_name: label
+  });
+
+  GA4.track('announcement_click', {
+    link_text: label,
+    location: 'announcement_bar'
+  });
+}
+
+// Navigation clicks (with section context)
+function trackNavClick(linkName, navType, navSection) {
+  GA4.track('navigation_click', {
+    link_name: linkName,
+    nav_type: navType,       // 'menu', 'dropdown', 'icon', 'logo'
+    nav_section: navSection, // 'main_nav', 'header', 'shop', 'women', 'men'
+    page_section: getCurrentSection()
+  });
+}
+
+// Promotion select (banners, hero CTAs)
+function trackPromotionSelect(promoId, promoName, ctaText, creativeSlot) {
+  GA4.track('select_promotion', {
+    promotion_id: promoId,
+    promotion_name: promoName,
+    creative_name: ctaText,
+    creative_slot: creativeSlot,
+    location_id: creativeSlot
+  });
+}
+
+// Outbound link clicks
+function trackOutboundClick(url, linkText, location) {
+  GA4.track('click', {
+    event_category: 'outbound',
+    event_label: linkText,
+    link_url: url,
+    link_text: linkText,
+    link_location: location,
+    outbound: true
+  });
+}
+
+// Social media clicks
+function trackSocialClick(platform, location) {
+  GA4.track('social_click', {
+    social_platform: platform,
+    link_location: location,
+    content_type: 'social_profile'
+  });
+
+  // Also track as outbound
+  trackOutboundClick('https://www.' + platform + '.com', platform, location);
+}
+
+// Footer link clicks
+function trackFooterClick(linkName, footerSection) {
+  GA4.track('footer_click', {
+    link_name: linkName,
+    footer_section: footerSection,
+    link_location: 'footer'
+  });
+
+  GA4.track('navigation_click', {
+    link_name: linkName,
+    nav_type: 'footer',
+    nav_section: footerSection,
+    page_section: 'footer'
+  });
+}
+
+// View All button
+function trackViewAll() {
+  const currentList = document.getElementById('sectionTitle').textContent;
+  GA4.track('view_all_click', {
+    current_list: currentList,
+    location: 'section_header'
+  });
+}
+
+// Continue Shopping from cart
+function trackContinueShopping() {
+  GA4.track('continue_shopping', {
+    from: 'cart_drawer',
+    cart_value: cart.reduce(function(s,i){ return s+i.price*i.qty; },0),
+    cart_item_count: cart.reduce(function(s,i){ return s+i.qty; },0)
+  });
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// 13. USER PROPERTIES (set once per session for segmentation)
+// ══════════════════════════════════════════════════════════════════
+(function setUserProperties() {
+  gtag('set', 'user_properties', {
+    platform_type: 'web',
+    viewport_width: window.innerWidth,
+    viewport_height: window.innerHeight,
+    device_pixel_ratio: window.devicePixelRatio || 1,
+    touch_device: ('ontouchstart' in window).toString(),
+    preferred_language: navigator.language || 'unknown',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+    color_scheme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+    connection_type: (navigator.connection && navigator.connection.effectiveType) || 'unknown'
+  });
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// 14. BEFORE UNLOAD — CART ABANDONMENT
+// ══════════════════════════════════════════════════════════════════
+window.addEventListener('beforeunload', function() {
+  if (cart.length > 0) {
+    const total = cart.reduce(function(s,i){ return s+i.price*i.qty; },0);
+    // Use sendBeacon for reliability
+    const data = {
+      event: 'cart_abandonment',
+      cart_value: total,
+      cart_item_count: cart.reduce(function(s,i){ return s+i.qty; },0),
+      unique_products: cart.length,
+      session_duration_seconds: Math.round((Date.now() - GA4.sessionStart) / 1000),
+      items: cart.map(function(i){ return i.id; }).join(',')
+    };
+    // GA4 via gtag (may not send reliably, but best effort)
+    GA4.track('cart_abandonment', data);
+  }
+
+  // Always track session end
+  GA4.track('session_end', {
+    session_duration_seconds: Math.round((Date.now() - GA4.sessionStart) / 1000),
+    total_scroll_depth: Math.max(...GA4.scrollMilestones, 0),
+    pages_interacted: GA4.viewedPromotions.size,
+    products_viewed: GA4.viewedProducts.size,
+    final_cart_value: cart.reduce(function(s,i){ return s+i.price*i.qty; },0)
+  });
+});
+
+
+// ══════════════════════════════════════════════════════════════════
+// MISC
+// ══════════════════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2600);
+}
+
+function scrollShop() {
+  document.getElementById('shopSection').scrollIntoView({behavior:'smooth'});
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+renderProducts();
+
+// Track initial page load timing
+window.addEventListener('load', function() {
+  const timing = performance.getEntriesByType('navigation')[0];
+  if (timing) {
+    GA4.track('page_load_performance', {
+      dom_interactive_ms: Math.round(timing.domInteractive),
+      dom_complete_ms: Math.round(timing.domComplete),
+      load_event_ms: Math.round(timing.loadEventEnd),
+      transfer_size_bytes: timing.transferSize || 0
+    });
+  }
+});
+</script>
+</body>
+</html>
